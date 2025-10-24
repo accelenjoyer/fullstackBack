@@ -116,12 +116,18 @@ app.post('/api/items', (req, res) => {
     return res.status(400).json({ error: 'Item already exists or in queue' });
   }
   
-  state.allItems.push({ id: newId });
-  state.allItems.sort((a, b) => a.id - b.id);
-  
-  batchQueues.add.push(newId);
-  
-  res.json({ success: true });
+  if (!state.allItems.find(item => item.id === newId)) {
+    state.allItems.push({ id: newId });
+    state.allItems.sort((a, b) => a.id - b.id);
+    
+    if (!batchQueues.add.includes(newId)) {
+      batchQueues.add.push(newId);
+    }
+    
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ error: 'Item already exists' });
+  }
 });
 
 app.delete('/api/select/:id', (req, res) => {
